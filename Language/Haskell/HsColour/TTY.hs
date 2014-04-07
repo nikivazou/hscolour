@@ -1,6 +1,8 @@
 -- | Highlights Haskell code with ANSI terminal codes.
 module Language.Haskell.HsColour.TTY (hscolour,hscolourG) where
 
+{-@ LIQUID "--totality" @-}
+
 import Language.Haskell.HsColour.ANSI as ANSI
 import Language.Haskell.HsColour.Classify
 import Language.Haskell.HsColour.Colourise

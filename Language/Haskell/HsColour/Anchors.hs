@@ -23,6 +23,7 @@ type Anchor = String
 --   immediately preceding its type signature, or preceding a (haddock)
 --   comment that comes immediately before the type signature, or failing
 --   either of those, before the first equation.
+{-@ insertAnchors :: xs:_ -> {v:_ | (len v) <= (len xs) } @-}
 insertAnchors :: [(TokenType,String)] -> [Either Anchor (TokenType,String)]
 insertAnchors = anchor emptyST
 

@@ -3,6 +3,8 @@ module Language.Haskell.HsColour.Classify
   , tokenise
   ) where
 
+{-@ LIQUID "--totality" @-}
+
 import Data.Char (isSpace, isUpper, isLower, isDigit)
 import Data.List
 

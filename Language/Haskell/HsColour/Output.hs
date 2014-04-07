@@ -1,5 +1,7 @@
 module Language.Haskell.HsColour.Output(TerminalType(..),Output(..)) where
 
+{-@ LIQUID "--totality" @-}
+
 data TerminalType = 
       Ansi16Colour -- ^ @\\033[Xm@-style escape sequences (with /X/ =~ [34][0-7]) 
     | XTerm256Compatible -- ^ 'Ansi16Colour', and also @\\033[Y8;5;Zm]@-style escape sequences (with /Y/ =~ [3,4] and /Z/ an integer in [0,255] with the XTerm colour cube semantics).

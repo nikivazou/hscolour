@@ -8,6 +8,9 @@ module Language.Haskell.HsColour.ACSS (
   , srcModuleName 
   ) where
 
+{-@ LIQUID "--totality" @-}
+
+import Language.Haskell.HsColour.General (liquidAssume)
 import Language.Haskell.HsColour.Anchors
 import Language.Haskell.HsColour.Classify as Classify
 import Language.Haskell.HsColour.HTML (renderAnchors, renderComment,
@@ -79,6 +82,18 @@ insertAnnotAnchors toks
   = stitch (zip toks' toks) $ insertAnchors toks'
   where toks' = [(x,y) | (x,y,_) <- toks] 
 
+{-@ Decrease stitch 3 @-}
+{-@ measure isLeftHd :: [Either a b] -> Prop
+    isLeftHd(x:xs) = isLeft(x)
+    isLeftHd([])   = false
+  @-}
+
+{-@ measure isLeft :: (Either a b) -> Prop 
+    isLeft(Left x)  = true 
+    isLeft(Right x) = false
+  @-}
+
+{-@ stitch ::  Eq b => xs:[(b, c)] -> {v:[Either a b] | (len v) <= (len xs)} -> [Either a c] @-}
 stitch ::  Eq b => [(b, c)] -> [Either a b] -> [Either a c]
 stitch xys ((Left a) : rest)
   = (Left a) : stitch xys rest
@@ -97,7 +112,8 @@ splitSrcAndAnns s =
   case findIndex (breakS ==) ls of
     Nothing -> (s, Ann M.empty)
     Just i  -> (src, {- trace ("annm =" ++ show ann) -} ann)
-               where (codes, _:mname:annots) = splitAt i ls
+               where (codes,xs)       = splitAt i ls
+                     (_:mname:annots) = liquidAssume (length xs > 2) xs
                      ann   = annotParse mname $ dropWhile isSpace $ unlines annots
                      src   = unlines codes
                      -- mname = srcModuleName src
@@ -116,6 +132,8 @@ breakS = "MOUSEOVER ANNOTATIONS"
 
 annotParse :: String -> String -> AnnMap
 annotParse mname = Ann . M.fromList . parseLines mname 0 . lines
+
+{-@ Decrease parseLines 3 @-}
 
 parseLines mname i [] 
   = []

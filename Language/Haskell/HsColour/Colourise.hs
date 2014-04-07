@@ -7,6 +7,8 @@ module Language.Haskell.HsColour.Colourise
   , colourise
   ) where
 
+{-@ LIQUID "--totality" @-}
+
 import Language.Haskell.HsColour.ColourHighlight
 import Language.Haskell.HsColour.Classify (TokenType(..))
 

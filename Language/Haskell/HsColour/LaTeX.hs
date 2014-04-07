@@ -1,6 +1,8 @@
 -- | Formats Haskell source code using LaTeX macros.
 module Language.Haskell.HsColour.LaTeX (hscolour, top'n'tail) where
 
+{-@ LIQUID "--totality" @-}
+
 import Language.Haskell.HsColour.Classify as Classify
 import Language.Haskell.HsColour.Colourise
 import Language.Haskell.HsColour.General
@@ -73,6 +75,7 @@ latexHighlight (Background c) = ("\\colorbox{"++ latexColour c ++"}{", "}")
 latexHighlight Italic         = ("{\\it{}", "}")
 
 -- | Translate a 'Colour' into a LaTeX colour name.
+{-@ latexColour :: c:Colour -> _ / [(if (isBasic c) then (0) else (1))] @-}
 latexColour :: Colour -> String
 latexColour Black   = "black"
 latexColour Red     = "red"

@@ -7,11 +7,33 @@ module Language.Haskell.HsColour.ColourHighlight
   , hlProjectToBasicColour8
   ) where
 
+{-@ LIQUID "--totality" @-}
+
 import Data.Word
 
 -- | Colours supported by ANSI codes.
 data Colour = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White | Rgb Word8 Word8 Word8
   deriving (Eq,Show,Read)
+
+{-@ measure isBasic :: Colour -> Prop
+    isBasic (Black)     = true
+    isBasic (Red)       = true
+    isBasic (Green)     = true
+    isBasic (Yellow)    = true
+    isBasic (Blue)      = true
+    isBasic (Magenta)   = true
+    isBasic (Cyan)      = true
+    isBasic (White)     = true
+    isBasic (Rgb r g b) = false
+  @-}
+
+
+{-@ ensureBasic :: String -> Colour -> BasicColour @-}
+ensureBasic :: String -> Colour -> Colour
+ensureBasic msg (Rgb _ _ _) = error $ "ensureBasic: " ++ msg 
+ensureBasic _   x           = x
+
+{-@ type BasicColour = {v:Colour | (isBasic v)} @-}
 
 -- | Convert an integer in the range [0,2^24-1] to its base 256-triplet, passing the result to the given continuation (avoid unnecessary tupleism).
 base256 :: Integral int => (Word8 -> Word8 -> Word8 -> r) -> int -> r
@@ -35,9 +57,11 @@ rgb24bit_to_xterm256 r g b = let f = (`div` 43)
 
 
 -- | Ap\"proxi\"mate a 24-bit Rgb colour with an ANSI8 colour. Will leave other colours unchanged and will never return an 'Rgb' constructor value. 
+{-@ projectToBasicColour8 ::  Colour -> BasicColour @-}
 projectToBasicColour8 ::  Colour -> Colour
 projectToBasicColour8 (Rgb r g b) = let f = (`div` 128)
-                          in  toEnum ( unbase 2 (f r) (f g) (f b) )
+                          in  ensureBasic "projectToBasicColour8" $ 
+                                toEnum ( unbase 2 (f r) (f g) (f b) )
 projectToBasicColour8 x = x
 
 

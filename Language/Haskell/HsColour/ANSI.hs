@@ -15,6 +15,8 @@ module Language.Haskell.HsColour.ANSI
   , TerminalType(..)
   ) where
 
+{-@ LIQUID "--totality" @-}
+
 import Language.Haskell.HsColour.ColourHighlight
 import Language.Haskell.HsColour.Output(TerminalType(..))
 
@@ -74,6 +76,7 @@ instance Enum Highlight where
   fromEnum (Background c) = 40 + fromEnum c
   fromEnum Italic       = 2
 
+  toEnum n = error $ "Internal error: toEnum " ++ show n ++ " on Highlight"
 
 -- | = 'highlightG' 'Ansi16Colour'
 highlight ::  [Highlight] -> String -> String
@@ -88,6 +91,7 @@ highlightOn = highlightOnG Ansi16Colour
 highlightG :: TerminalType -> [Highlight] -> String -> String
 highlightG tt attrs s = highlightOnG tt attrs ++ s ++ highlightOff
 
+{-@ highlightOnG :: TerminalType -> xs:[Highlight] -> String / [(if ((len xs) = 0) then 2 else (len xs))] @-}
 highlightOnG :: TerminalType -> [Highlight] -> String
 highlightOnG tt []     = highlightOnG tt [Normal]
 highlightOnG tt attrs  = "\ESC["

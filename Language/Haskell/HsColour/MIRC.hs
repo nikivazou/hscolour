@@ -2,6 +2,8 @@
 --   (see http:\/\/irssi.org\/documentation\/formats)
 module Language.Haskell.HsColour.MIRC (hscolour) where
 
+{-@ LIQUID "--totality" @-}
+
 import Language.Haskell.HsColour.Classify as Classify
 import Language.Haskell.HsColour.Colourise
 
@@ -21,7 +23,7 @@ renderToken pref (t,s) = fontify (colourise pref t) s
 -- mIRC stuff
 fontify hs =
     mircColours (joinColours hs)
-    . highlight (filter (`elem`[Normal,Bold,Underscore,ReverseVideo]) hs)
+    . highlight (filterElts [Normal,Bold,Underscore,ReverseVideo] hs)
   where
     highlight [] s     = s
     highlight (h:hs) s = font h (highlight hs s)
@@ -30,6 +32,18 @@ fontify hs =
     font Bold           s = '\^B':s++"\^B"
     font Underscore     s = '\^_':s++"\^_"
     font ReverseVideo   s = '\^V':s++"\^V"
+
+{-@ filterElts :: forall <p :: a -> Prop>. Eq a => [a<p>] -> [a] -> [a<p>] @-}
+filterElts :: Eq a => [a] -> [a] -> [a]
+filterElts xs ys = go xs xs ys
+
+
+{-@ go :: forall <p :: a -> Prop>. Eq a => xs:[a<p>] -> ws:[a<p>] -> zs:[a] -> [a<p>] /[(len zs), (len ws)] @-}
+go :: Eq a => [a] -> [a] -> [a] -> [a]
+go xs (w:ws) (z:zs) | w == z    = z : go xs xs zs
+                    | otherwise = go xs ws (z:zs)
+go xs []     (z:zs)             = go xs xs zs
+go xs ws     []                 = []
 
 -- mIRC combines colour codes in a non-modular way
 data MircColour = Mirc { fg::Colour, dim::Bool, bg::Maybe Colour, blink::Bool}

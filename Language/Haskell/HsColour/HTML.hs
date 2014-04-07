@@ -6,6 +6,8 @@ module Language.Haskell.HsColour.HTML
     , renderAnchors, renderComment, renderNewLinesAnchors, escape
     ) where
 
+{-@ LIQUID "--totality" @-}
+
 import Language.Haskell.HsColour.Anchors
 import Language.Haskell.HsColour.Classify as Classify
 import Language.Haskell.HsColour.Colourise
@@ -44,8 +46,8 @@ renderAnchors render (Right r) = render r
 -- if there are http://links/ in a comment, turn them into
 -- hyperlinks
 renderComment :: String -> String
-renderComment xs@('h':'t':'t':'p':':':'/':'/':_) =
-        renderLink a ++ renderComment b
+renderComment ('h':'t':'t':'p':':':'/':'/':xs) =
+        renderLink ("http://" ++ a) ++ renderComment b
     where
         -- see http://www.gbiv.com/protocols/uri/rfc/rfc3986.html#characters
         isUrlChar x = isAlphaNum x || x `elem` ":/?#[]@!$&'()*+,;=-._~%"

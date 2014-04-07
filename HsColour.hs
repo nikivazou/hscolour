@@ -1,4 +1,6 @@
 {-# LANGUAGE CPP #-}
+
+{-@ LIQUID "--totality" @-}
 module Main where
 
 import Language.Haskell.HsColour
@@ -21,7 +23,7 @@ import System.IO (hSetEncoding, utf8)
 #endif
 
 version :: String
-version = show MAJOR ++"."++show MINOR
+version = "" -- show MAJOR ++"."++show MINOR
 
 optionTable :: [(String,Option)]
 optionTable = [ ("help",    Help)

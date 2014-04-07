@@ -1,6 +1,8 @@
 -- | Formats Haskell source code as HTML with inline CSS.
 module Language.Haskell.HsColour.InlineCSS (hscolour,top'n'tail) where
 
+{-@ LIQUID "--totality" @-}
+
 import Language.Haskell.HsColour.Anchors
 import Language.Haskell.HsColour.Classify as Classify
 import Language.Haskell.HsColour.Colourise

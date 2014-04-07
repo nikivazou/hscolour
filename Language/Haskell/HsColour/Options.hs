@@ -4,6 +4,8 @@ module Language.Haskell.HsColour.Options
   , TerminalType(..)
   ) where 
 
+{-@ LIQUID "--totality" @-}
+
 import Language.Haskell.HsColour.Output
 
 -- | Command-line options

@@ -6,6 +6,8 @@ module Language.Haskell.HsColour.CSS
   , pre 
   ) where
 
+{-@ LIQUID "--totality" @-}
+
 import Language.Haskell.HsColour.Anchors
 import Language.Haskell.HsColour.Classify as Classify
 import Language.Haskell.HsColour.HTML (renderAnchors, renderComment,
