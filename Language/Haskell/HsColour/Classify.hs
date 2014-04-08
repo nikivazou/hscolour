@@ -5,6 +5,8 @@ module Language.Haskell.HsColour.Classify
 
 {-@ LIQUID "--totality" @-}
 
+import qualified GHC.Read -- LIQUID get lex specification
+
 import Data.Char (isSpace, isUpper, isLower, isDigit)
 import Data.List
 
@@ -15,6 +17,7 @@ tokenise str =
     let chunks = glue . chunk $ str 
     in markDefs $ map (\s-> (classify s,s)) chunks
 
+{-@ markDefs :: xs:_ -> _ / [(len xs), 1] @-}
 markDefs :: [(TokenType, String)] -> [(TokenType, String)]
 markDefs [] = []
 markDefs ((Varid, s) : rest) = (Definition, s) : continue rest
@@ -22,12 +25,13 @@ markDefs ((Varop, ">") : (Space, " ") : (Varid, d) : rest) =
     (Varop, ">") : (Space, " ") : (Definition, d) : continue rest
 markDefs rest = continue rest
 
+{-@ continue :: xs:_ -> _ / [(len xs), 0] @-}
 continue rest 
     = let (thisLine, nextLine) = span (/= (Space, "\n")) rest
       in
         case nextLine of
           [] -> thisLine
-          ((Space, "\n"):nextLine') -> (thisLine ++ ((Space, "\n") : (markDefs nextLine')))
+          ({-(Space, "\n")-}_:nextLine') -> (thisLine ++ ((Space, "\n") : (markDefs nextLine')))
 
 
 -- Basic Haskell lexing, except we keep whitespace.
@@ -71,16 +75,22 @@ glue (s:ss)       = s: glue ss
 glue []           = []
 
 -- Deal with comments.
+{-@ Decrease nestcomment 2 @-}
+
+{-@ nestcomment :: Nat -> xs:_ -> (_,{v:_|(if ((len xs) = 0) then ((len v) = 0) else ((len v) <= (len xs))) }) @-}
+
 nestcomment :: Int -> String -> (String,String)
 nestcomment n ('{':'-':ss) | n>=0 = (("{-"++cs),rm)
                                   where (cs,rm) = nestcomment (n+1) ss
-nestcomment n ('-':'}':ss) | n>0  = (("-}"++cs),rm)
-                                  where (cs,rm) = nestcomment (n-1) ss
+nestcomment n ('-':'}':ss) | n>0  = let (cs,rm) = nestcomment (n-1) ss
+                                    in (("-}"++cs),rm)
 nestcomment n ('-':'}':ss) | n==0 = ("-}",ss)
 nestcomment n (s:ss)       | n>=0 = ((s:cs),rm)
                                   where (cs,rm) = nestcomment n ss
 nestcomment n [] = ([],[])
 
+
+{-@ eolcomment :: xs:_ -> ({v:_ | (len v) <= (len xs)},{v:_ | (len v) <= (len xs)}) @-}
 eolcomment :: String -> (String,String)
 eolcomment s@('\n':_) = ([], s)
 eolcomment ('\r':s)   = eolcomment s

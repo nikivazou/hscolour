@@ -2,9 +2,9 @@ HsColour.hs
 x Language.Haskell.HsColour.hs
 
 x Language.Haskell.HsColour.ACSS.hs
-Language.Haskell.HsColour.Anchors.hs
+xx HERE Language.Haskell.HsColour.Anchors.hs
 x Language.Haskell.HsColour.ANSI.hs <- bug!!! toEnum not defined on HighLight
-Language.Haskell.HsColour.Classify.hs
+x Language.Haskell.HsColour.Classify.hs
 x Language.Haskell.HsColour.ColourHighlight.hs <- che --ck again false found
 Language.Haskell.HsColour.Colourise.hs
 x Language.Haskell.HsColour.CSS.hs
