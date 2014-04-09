@@ -2,6 +2,9 @@ module Language.Haskell.HsColour.Anchors
   ( insertAnchors
   ) where
 
+{-@ LIQUID "--totality" @-}
+{-@ LIQUID "--no-case-expand" @-}
+
 import Language.Haskell.HsColour.Classify
 import Language.Haskell.HsColour.General
 import Data.List
@@ -23,12 +26,29 @@ type Anchor = String
 --   immediately preceding its type signature, or preceding a (haddock)
 --   comment that comes immediately before the type signature, or failing
 --   either of those, before the first equation.
-{-@ insertAnchors :: xs:_ -> {v:_ | (len v) <= (len xs) } @-}
+{-@ insertAnchors :: xs:_ -> {v:_ | (lenRight v) = (len xs) } @-}
 insertAnchors :: [(TokenType,String)] -> [Either Anchor (TokenType,String)]
 insertAnchors = anchor emptyST
 
+{-@ invariant {v:[Either a b] | (((lenRight v) >= 0) && ((lenRight v) <= (len v)))} @-}
+{-@ measure lenRight :: [Either a b] -> Int 
+    lenRight(x:xs) = (if (isLeft x) then (lenRight xs) else ((lenRight xs) + 1))
+    lenRight([])   = 0
+
+  @-}
+{-@ measure isLeftHd :: [Either a b] -> Prop
+    isLeftHd(x:xs) = isLeft(x)
+    isLeftHd([])   = false
+  @-}
+
+{-@ measure isLeft :: (Either a b) -> Prop 
+    isLeft(Left x)  = true 
+    isLeft(Right x) = false
+  @-}
+
 -- looks at first token in the left-most position of each line
 -- precondition: have just seen a newline token.
+{-@ anchor :: _ -> xs:_ -> {v:_ | (lenRight v) = (len xs) } /  [(len xs) , 1] @-}
 anchor :: ST -> [(TokenType, String)] -> [Either String (TokenType, String)]
 anchor st s = case identifier st s of
                 Nothing -> emit st s
@@ -52,6 +72,7 @@ escape = concatMap enc
 -- emit passes stuff through until the next newline has been encountered,
 -- then jumps back into the anchor function
 -- pre-condition: newlines are explicitly single tokens
+{-@ emit :: _ -> xs:_-> _ / [(len xs) , 0] @-}
 emit :: ST -> [(TokenType, String)] -> [Either String (TokenType, String)]
 emit st (t@(Space,"\n"):stream) = Right t: anchor st stream
 emit st (t:stream)              = Right t: emit st stream
@@ -60,6 +81,8 @@ emit _  []                      = []
 -- Given that we are at the beginning of a line, determine whether there
 -- is an identifier defined here, and if so, return it.
 -- precondition: have just seen a newline token.
+
+{-@ Decrease identifier 2 @-}
 identifier ::  ST -> [(TokenType, String)] -> Maybe String
 identifier st t@((kind,v):stream) | kind`elem`[Varid,Definition] =
     case skip stream of
@@ -151,11 +174,17 @@ context [] = []
 getInstance = Just . unwords . ("instance":) . words . concat . map snd
               . trimContext . takeWhile (/=(Keyword,"where"))
   where
-    trimContext ts = if (Keyglyph,"=>") `elem` ts
-                     ||  (Keyglyph,"⇒") `elem` ts
-                     then tail . dropWhile (`notElem`[(Keyglyph,"=>")
-                                                     ,(Keyglyph,"⇒")]) $ ts
-                     else ts
+-- LIQUID     trimContext ts = if (Keyglyph,"=>") `elem` ts
+-- LIQUID                      ||  (Keyglyph,"⇒") `elem` ts
+-- LIQUID                      then tail . dropWhile (`notElem`[(Keyglyph,"=>")
+-- LIQUID                                                      ,(Keyglyph,"⇒")]) $ ts
+-- LIQUID                      else ts
+    trimContext ts = go ts ts
+
+    go [] ts = ts
+    go (x:xs) ts |   x == (Keyglyph,"=>") 
+                 ||  x == (Keyglyph,"⇒")   = xs
+                 | otherwise               = go xs ts
 
 -- simple implementation of a string lookup table.
 -- replace this with something more sophisticated if needed.

@@ -83,17 +83,8 @@ insertAnnotAnchors toks
   where toks' = [(x,y) | (x,y,_) <- toks] 
 
 {-@ Decrease stitch 3 @-}
-{-@ measure isLeftHd :: [Either a b] -> Prop
-    isLeftHd(x:xs) = isLeft(x)
-    isLeftHd([])   = false
-  @-}
 
-{-@ measure isLeft :: (Either a b) -> Prop 
-    isLeft(Left x)  = true 
-    isLeft(Right x) = false
-  @-}
-
-{-@ stitch ::  Eq b => xs:[(b, c)] -> {v:[Either a b] | (len v) <= (len xs)} -> [Either a c] @-}
+{-@ stitch ::  Eq b => xs:[(b, c)] -> {v:[Either a b] | (lenRight v) = (len xs)} -> [Either a c] @-}
 stitch ::  Eq b => [(b, c)] -> [Either a b] -> [Either a c]
 stitch xys ((Left a) : rest)
   = (Left a) : stitch xys rest
