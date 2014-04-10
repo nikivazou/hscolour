@@ -10,6 +10,8 @@ import Language.Haskell.HsColour.General
 import Data.List
 import Data.Char (isUpper, isLower, isDigit, ord, intToDigit)
 
+import qualified Data.Either -- LIQUID get measure definitions
+
 -- This is an attempt to find the first defining occurrence of an
 -- identifier (function, datatype, class) in a Haskell source file.
 -- Rather than parse the module properly, we try to get by with just
@@ -30,21 +32,6 @@ type Anchor = String
 insertAnchors :: [(TokenType,String)] -> [Either Anchor (TokenType,String)]
 insertAnchors = anchor emptyST
 
-{-@ invariant {v:[Either a b] | (((lenRight v) >= 0) && ((lenRight v) <= (len v)))} @-}
-{-@ measure lenRight :: [Either a b] -> Int 
-    lenRight(x:xs) = (if (isLeft x) then (lenRight xs) else ((lenRight xs) + 1))
-    lenRight([])   = 0
-
-  @-}
-{-@ measure isLeftHd :: [Either a b] -> Prop
-    isLeftHd(x:xs) = isLeft(x)
-    isLeftHd([])   = false
-  @-}
-
-{-@ measure isLeft :: (Either a b) -> Prop 
-    isLeft(Left x)  = true 
-    isLeft(Right x) = false
-  @-}
 
 -- looks at first token in the left-most position of each line
 -- precondition: have just seen a newline token.

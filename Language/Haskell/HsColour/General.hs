@@ -16,7 +16,7 @@ dropFirst :: Eq a => a -> [a] -> [a]
 dropFirst x (y:ys) | x == y = ys
 dropFirst x ys = ys
 
-{-@ liquidAssume :: b:Bool -> a -> {v:a | (Prop b)} @-}
+{-@ liquidAssume :: b:Bool -> x:a -> {v:a | ((Prop b) && (x = v))} @-}
 liquidAssume     :: Bool -> a -> a
 liquidAssume b x | b         = x
              | otherwise = error $ show b

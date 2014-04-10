@@ -1,4 +1,6 @@
 {-# LANGUAGE CPP #-}
+#define MAJOR 1
+#define MINOR 20
 
 {-@ LIQUID "--totality" @-}
 module Main where
@@ -7,6 +9,7 @@ import Language.Haskell.HsColour
 import qualified Language.Haskell.HsColour as HSColour
 import Language.Haskell.HsColour.Colourise (readColourPrefs)
 import Language.Haskell.HsColour.Options
+import Language.Haskell.HsColour.General (liquidAssume)
 import Language.Haskell.HsColour.ACSS (breakS, srcModuleName)
 import System.Environment as System
 import System.Exit
@@ -23,7 +26,7 @@ import System.IO (hSetEncoding, utf8)
 #endif
 
 version :: String
-version = "" -- show MAJOR ++"."++show MINOR
+version = show MAJOR ++"."++show MINOR
 
 optionTable :: [(String,Option)]
 optionTable = [ ("help",    Help)
@@ -61,8 +64,10 @@ main = do
       bad     = [ o | Left o <- options ]
       good    = [ o | Right o <- options ]
       formats = [ f | Format f <- good ] ++ [ ACSS | Annot _ <- good ]
-      outFile = [ f | Output f <- good ]
-      annFile = [ f | Annot f <- good ]
+      outFile_  = [ f | Output f <- good ]
+      outFile   = liquidAssume (length outFile_ <= 1) outFile_
+      annFile_  = [ f | Annot f <- good ]
+      annFile   = liquidAssume (length annFile_ <= 1) annFile_
       output    = useDefault  TTY         id           formats
       anchors   = useDefault  False       id           [ b | Anchors b <- good ]
       partial   = useDefault  False       id           [ b | Partial b <- good ]
@@ -90,19 +95,23 @@ main = do
     writeResult outF s = do if null outF then putStrLn s
                                          else writeUTF8File (last outF) s
                             exitSuccess
+    {-@ fileInteract :: {v:_ | (len v) <= 1} -> {v:_| (len v) <= 1} -> _ -> _ -> _@-}
     fileInteract out ann inFs u 
       = do h <- case out of
                   []     -> return stdout
                   [outF] -> openFile outF WriteMode >>= set_utf8_io_enc
+                  _      -> liquidError "" 
            forM_ inFs $ \ (f, lit) -> do
              src <- readUTF8File f
              a   <- readAnnots src ann
              hPutStr h $ u lit $ src ++ a 
            hClose h
+    {-@ ttyInteract :: {v:_ | (len v) <= 1} -> _ -> _ -> _@-}
     ttyInteract []     lit u = do hSetBuffering stdout NoBuffering
                                   Prelude.interact (u lit)
     ttyInteract [outF] lit u = do c <- hGetContents stdin
                                   writeUTF8File outF (u lit c)
+    ttyInteract _ _ _ = liquidError ""                               
     exitSuccess = exitWith ExitSuccess
     errorOut s  = hPutStrLn stderr s >> hFlush stderr >> exitFailure
     usage prog  = "Usage: "++prog
@@ -119,19 +128,28 @@ main = do
     guessLiterate Nothing  f = ".lhs" `isSuffixOf` f || ".ly" `isSuffixOf` f
                                || ".lx" `isSuffixOf` f
     guessLiterate (Just b) _ = b
+    {-@ readAnnots :: _ -> {v:_ | (len v) <= 1} -> _@-}
     readAnnots _   []     = return ""
     readAnnots src [annF] = do putStrLn $ "HsColour Annot on Module: " ++ mname
                                annots <- readUTF8File annF
                                return $ breakS ++ "\n" ++ mname ++ "\n" ++ annots
                             where mname = srcModuleName src
+    readAnnots _   _     = liquidError ""
 
+{-@ liquidError :: {v:String| false } -> a @-}
+liquidError :: String -> a
+liquidError = undefined
 
 -- some simple text formatting for usage messages
+{-@ Decrease width 3 @-}
 width n left  []    = []
 width n left (s:ss) = if size > left then "\n":s : width n n             ss
                                      else      s : width n (left-size-1) ss
   where size = length s
 
+{-@ Decrease indent 2 @-}
+{-@ indent :: Nat -> String -> String @-}
+indent :: Int -> String -> String
 indent n [] = []
 indent n ('\n':s) = '\n':replicate n ' '++indent n s
 indent n (c:s)    = c: indent n s

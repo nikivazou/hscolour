@@ -7,6 +7,7 @@ module Language.Haskell.HsColour.Colourise
   , colourise
   ) where
 
+{- LIQUID "--no-case-expand" @-}
 {-@ LIQUID "--totality" @-}
 
 import Language.Haskell.HsColour.ColourHighlight
