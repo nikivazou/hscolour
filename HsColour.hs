@@ -100,7 +100,6 @@ main = do
       = do h <- case out of
                   []     -> return stdout
                   [outF] -> openFile outF WriteMode >>= set_utf8_io_enc
-                  _      -> liquidError "" 
            forM_ inFs $ \ (f, lit) -> do
              src <- readUTF8File f
              a   <- readAnnots src ann
@@ -111,7 +110,6 @@ main = do
                                   Prelude.interact (u lit)
     ttyInteract [outF] lit u = do c <- hGetContents stdin
                                   writeUTF8File outF (u lit c)
-    ttyInteract _ _ _ = liquidError ""                               
     exitSuccess = exitWith ExitSuccess
     errorOut s  = hPutStrLn stderr s >> hFlush stderr >> exitFailure
     usage prog  = "Usage: "++prog
@@ -134,11 +132,6 @@ main = do
                                annots <- readUTF8File annF
                                return $ breakS ++ "\n" ++ mname ++ "\n" ++ annots
                             where mname = srcModuleName src
-    readAnnots _   _     = liquidError ""
-
-{-@ liquidError :: {v:String| false } -> a @-}
-liquidError :: String -> a
-liquidError = undefined
 
 -- some simple text formatting for usage messages
 {-@ Decrease width 3 @-}
