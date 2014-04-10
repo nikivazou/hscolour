@@ -25,7 +25,10 @@ data ColourPrefs = ColourPrefs
   , conid, varid, conop, varop
   , string, char, number, cpp
   , selection, variantselection, definition :: [Highlight]
-  } deriving (Eq,Show,Read)
+  } deriving (Eq,Show)-- ,Read)
+
+-- LIQUID tmp 
+instance Read ColourPrefs where
 
 defaultColourPrefs = ColourPrefs
   { keyword  = [Foreground Green,Underscore]
