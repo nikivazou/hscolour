@@ -15,25 +15,26 @@ import Data.Word
 data Colour = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White | Rgb Word8 Word8 Word8
   deriving (Eq,Show,Read)
 
-{-@ measure isBasic :: Colour -> Prop
-    isBasic (Black)     = true
-    isBasic (Red)       = true
-    isBasic (Green)     = true
-    isBasic (Yellow)    = true
-    isBasic (Blue)      = true
-    isBasic (Magenta)   = true
-    isBasic (Cyan)      = true
-    isBasic (White)     = true
-    isBasic (Rgb r g b) = false
+{-@ measure isBasic :: Colour -> Int
+    isBasic (Black)     = 1
+    isBasic (Red)       = 1
+    isBasic (Green)     = 1
+    isBasic (Yellow)    = 1
+    isBasic (Blue)      = 1
+    isBasic (Magenta)   = 1
+    isBasic (Cyan)      = 1
+    isBasic (White)     = 1
+    isBasic (Rgb r g b) = 0
   @-}
 
+{-@ invariant {v:Colour | (((isBasic v) == 1) || ((isBasic v) == 0))} @-}
 
 {-@ ensureBasic :: String -> Colour -> BasicColour @-}
 ensureBasic :: String -> Colour -> Colour
 ensureBasic msg (Rgb _ _ _) = error $ "ensureBasic: " ++ msg 
 ensureBasic _   x           = x
 
-{-@ type BasicColour = {v:Colour | (isBasic v)} @-}
+{-@ type BasicColour = {v:Colour | (isBasic v) = 1} @-}
 
 -- | Convert an integer in the range [0,2^24-1] to its base 256-triplet, passing the result to the given continuation (avoid unnecessary tupleism).
 base256 :: Integral int => (Word8 -> Word8 -> Word8 -> r) -> int -> r

@@ -28,10 +28,24 @@ fontify hs =
     highlight [] s     = s
     highlight (h:hs) s = font h (highlight hs s)
 
+    {-@ font :: {v:_ | (isFont v)} -> _ -> _ @-}
     font Normal         s = s
     font Bold           s = '\^B':s++"\^B"
     font Underscore     s = '\^_':s++"\^_"
     font ReverseVideo   s = '\^V':s++"\^V"
+
+{-@ measure isFont :: Highlight -> Prop
+    isFont(Normal) = true
+    isFont(Bold) = true
+    isFont(Underscore) = true
+    isFont(ReverseVideo) = true
+    isFont(Dim) = false
+    isFont(Blink) = false
+    isFont(Italic) = false
+    isFont(Concealed) = false
+    isFont(Background x) = false
+    isFont(Foreground x) = false
+  @-}
 
 {-@ filterElts :: forall <p :: a -> Prop>. Eq a => [a<p>] -> [a] -> [a<p>] @-}
 filterElts :: Eq a => [a] -> [a] -> [a]
@@ -63,6 +77,7 @@ mircColours (Mirc fg dim Nothing   blink) s = '\^C': code fg dim++s++"\^O"
 mircColours (Mirc fg dim (Just bg) blink) s = '\^C': code fg dim++','
                                                    : code bg blink++s++"\^O"
 
+{-@ code :: c:Colour -> Bool -> String / [ 1 - (isBasic c)] @-}
 code :: Colour -> Bool -> String
 code Black   False = "1"
 code Red     False = "5"
