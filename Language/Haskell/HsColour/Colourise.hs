@@ -7,7 +7,6 @@ module Language.Haskell.HsColour.Colourise
   , colourise
   ) where
 
-{- LIQUID "--no-case-expand" @-}
 {-@ LIQUID "--totality" @-}
 
 import Language.Haskell.HsColour.ColourHighlight
@@ -25,10 +24,7 @@ data ColourPrefs = ColourPrefs
   , conid, varid, conop, varop
   , string, char, number, cpp
   , selection, variantselection, definition :: [Highlight]
-  } deriving (Eq,Show)-- ,Read)
-
--- LIQUID tmp 
-instance Read ColourPrefs where
+  } deriving (Eq,Show,Read)
 
 defaultColourPrefs = ColourPrefs
   { keyword  = [Foreground Green,Underscore]

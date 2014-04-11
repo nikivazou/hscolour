@@ -28,11 +28,12 @@ fontify hs =
     highlight [] s     = s
     highlight (h:hs) s = font h (highlight hs s)
 
-    {-@ font :: {v:_ | (isFont v)} -> _ -> _ @-}
     font Normal         s = s
     font Bold           s = '\^B':s++"\^B"
     font Underscore     s = '\^_':s++"\^_"
     font ReverseVideo   s = '\^V':s++"\^V"
+
+{-@ qualif IsFont(v: Highlight): (isFont v) @-}
 
 {-@ measure isFont :: Highlight -> Prop
     isFont(Normal) = true
