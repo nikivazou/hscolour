@@ -75,7 +75,7 @@ latexHighlight (Background c) = ("\\colorbox{"++ latexColour c ++"}{", "}")
 latexHighlight Italic         = ("{\\it{}", "}")
 
 -- | Translate a 'Colour' into a LaTeX colour name.
-{-@ latexColour :: c:Colour -> _ / [(if (isBasic c) then (0) else (1))] @-}
+{-@ latexColour :: c:Colour -> _ / [(1 - (isBasic c))] @-}
 latexColour :: Colour -> String
 latexColour Black   = "black"
 latexColour Red     = "red"
