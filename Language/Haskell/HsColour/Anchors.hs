@@ -1,4 +1,4 @@
-  module Language.Haskell.HsColour.Anchors
+module Language.Haskell.HsColour.Anchors
   ( insertAnchors
   ) where
 
