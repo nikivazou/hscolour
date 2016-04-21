@@ -1,4 +1,4 @@
-module Language.Haskell.HsColour.Anchors
+  module Language.Haskell.HsColour.Anchors
   ( insertAnchors
   ) where
 
@@ -28,14 +28,15 @@ type Anchor = String
 --   immediately preceding its type signature, or preceding a (haddock)
 --   comment that comes immediately before the type signature, or failing
 --   either of those, before the first equation.
-{-@ insertAnchors :: xs:[(TokenType,String)] -> {v:[Either Anchor (TokenType,String)] | (lenRight v) = (len xs) } @-}
+{- insertAnchors :: xs:[(TokenType,String)] -> {v:[Either Anchor (TokenType,String)] | (lenRight v) = (len xs) } @-}
+{-@ insertAnchors :: xs:_ -> {v:_ | (lenRight v) = (len xs) } @-}
 insertAnchors :: [(TokenType,String)] -> [Either Anchor (TokenType,String)]
 insertAnchors = anchor emptyST
 
 
 -- looks at first token in the left-most position of each line
 -- precondition: have just seen a newline token.
-{-@ anchor :: ST -> xs:[(TokenType, String)] -> {v:[Either String (TokenType, String)] | (lenRight v) = (len xs) } /  [(len xs) , 1] @-}
+{-@ anchor :: ST -> xs:_ -> {v:_ | (lenRight v) = (len xs) } /  [(len xs) , 1] @-}
 anchor :: ST -> [(TokenType, String)] -> [Either String (TokenType, String)]
 anchor st s = case identifier st s of
                 Nothing -> emit st s
