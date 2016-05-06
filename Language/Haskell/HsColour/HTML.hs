@@ -1,3 +1,5 @@
+{-@ LIQUID "--pruneunsorted" @-}
+
 -- | Formats Haskell source code using HTML with font tags.
 module Language.Haskell.HsColour.HTML 
     ( hscolour

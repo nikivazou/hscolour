@@ -1,3 +1,5 @@
+{-@ LIQUID "--pruneunsorted" @-}
+
 {-# LANGUAGE CPP #-}
 #define MAJOR 1
 #define MINOR 20

@@ -1,3 +1,5 @@
+{-@ LIQUID "--pruneunsorted" @-}
+
 module Language.Haskell.HsColour.Anchors
   ( insertAnchors
   ) where

@@ -1,3 +1,5 @@
+{-@ LIQUID "--pruneunsorted" @-}
+
 -- | Formats Haskell source code as HTML with CSS and Mouseover Type Annotations
 module Language.Haskell.HsColour.ACSS (
     hscolour
