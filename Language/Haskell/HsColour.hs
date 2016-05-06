@@ -1,3 +1,5 @@
+{-@ LIQUID "--pruneunsorted" @-}
+
 -- | This is a library which colourises Haskell code.
 --   It currently has six output formats:
 --
